@@ -1,0 +1,30 @@
+var image1 = ee.Image('COPERNICUS/S2_SR/20210813T081609_20210813T082645_T36SXA'); //13/8 image
+var image2 = ee.Image('COPERNICUS/S2_SR/20210818T081611_20210818T082253_T36SXA'); //18/8 image
+var img1NDVI = image1.normalizedDifference(['B8','B4']); //NDVI INDEX
+var img2NDVI = image2.normalizedDifference(['B8','B4']);
+var img1GNDV = image1.normalizedDifference(['B8','B3']); //GNDV INDEX
+var img2GNDV = image2.normalizedDifference(['B8','B3']);
+
+var NDVI_Setting = {min: 0.1, max: 0.9, palette: 'FFFFFF, CE7E45, DF923D, F1B555, FCD163, 99B718, 74A901, 66A000, 529400,' +
+    '3E8601, 207401, 056201, 004C00, 023B01, 012E01, 011D01, 011301'};
+var IMAGES = [ img1NDVI, img2NDVI, img1GNDV, img2GNDV];
+var NAMES = ['13AUG NDVI', '18AUG NDVI', '13AUG GNDV', '18AUG GNDV'];
+
+var maps = [ ];
+NAMES.forEach(function(name, index) {
+  var map = ui.Map();
+  map.add(ui.Label(name));
+  map.addLayer(IMAGES[index], NDVI_Setting, name);
+  map.setControlVisibility(false);
+  maps.push(map);});
+var linker = ui.Map.Linker(maps); // Enable zooming on the top-left map.
+maps[0].setControlVisibility({zoomControl: true}); // Show the scale (e.g. '500m') on the bottom-right map.
+maps[3].setControlVisibility({scaleControl: true});
+var title = ui.Label('Compare Images', { // Create a title.
+  stretch: 'horizontal', textAlign: 'center', fontWeight: 'bold', fontSize: '16px'});
+var mapGrid = ui.Panel(  // Create a grid of maps.
+  [ ui.Panel([maps[0], maps[1]], null, {stretch: 'both'}),
+    ui.Panel([maps[2], maps[3]], null, {stretch: 'both'})],
+  ui.Panel.Layout.Flow('horizontal'), {stretch: 'both'});
+ui.root.widgets().reset([title, mapGrid]); // Add the maps and title to the ui.root.
+ui.root.setLayout(ui.Panel.Layout.Flow('vertical'));
