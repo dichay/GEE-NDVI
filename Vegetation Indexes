@@ -1,0 +1,35 @@
+
+
+//NDRE
+//NIR, RE1
+var image_ndre = image.normalizedDifference(['B8','B5']);
+
+
+//GNDV
+//IR, Green
+var image_gndv = image.normalizedDifference(['B8','B3']);
+
+
+//SAVI
+//NIR, RED
+//soil coeff.
+var  image_savi= image.expression('(1.5*(NIR-RED))/(NIR+RED+0.5)',
+{'NIR': image.select('B8'),'RED': image.select('B4'),});
+
+
+//VARI
+//RGB
+var image_vari = image.expression('(GREEN - RED) / (GREEN + RED - BLUE)',{'BLUE':image.select('B2'),'GREEN': image.select('B3'),'RED':image.select('B4')});
+
+
+//ICCI
+//RE2.3.
+var ICCI = image.expression( '((RE3/RE2)-1)',
+ {  'RE3': image.select('b10'),  'RE2': image.select('b9'), });
+//REIP
+//RE1,2.3.
+var REIP = image.expression(
+    '(40*(((Red+RE3)/2)-RE1)/(RE2-RE1))+702',
+ { 'Red': image.select('B4'),      'RE1': image.select('B5'),
+     'RE2': image.select('B6'),      'RE3': image.select('B7')   });
+
