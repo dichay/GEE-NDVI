@@ -1,0 +1,24 @@
+var imageCollection = ee.ImageCollection("COPERNICUS/S2_SR");
+var image = imageCollection.filterDate('2021-08-13','2021-08-19')
+  .sort("CLOUD_COVER",false)
+  .filterMetadata('MGRS_TILE','equals','36SXA');
+
+var NDVI_Setting = {min: 0.1, max: 0.9, palette: 'FFFFFF, CE7E45, DF923D, F1B555, FCD163, 99B718, 74A901, 66A000, 529400,' +
+    '3E8601, 207401, 056201, 004C00, 023B01, 012E01, 011D01, 011301'};
+
+var image1 = ee.Image('COPERNICUS/S2_SR/20210813T081609_20210813T082645_T36SXA'); //13/8 image - old
+var image2 = ee.Image('COPERNICUS/S2_SR/20210818T081611_20210818T082253_T36SXA'); //18/8 image - new
+
+var image_ndvi1 = image1.normalizedDifference(['B8','B4']); 
+Map.addLayer(image1,{bands:["B4","B3","B2"],min:0,max:5000},'RGB1308');//RGB layer - 13/8 image
+Map.addLayer(image_ndvi1,NDVI_Setting,'NDVI1308');  // NDVI layer 
+
+var image_ndvi2 = image2.normalizedDifference(['B8','B4']);
+Map.addLayer(image2,{bands:["B4","B3","B2"],min:0,max:5000},'RGB1808');//RGB layer - 18/8 image
+Map.addLayer(image_ndvi2,NDVI_Setting,'NDVI1808');  // NDVI layer 
+
+var NDVI_Difference = image_ndvi2.subtract(image_ndvi1);
+Map.addLayer(NDVI_Difference,{min: -0.3, max: 0.3, 
+  palette: ['FF0000','C00000','800000','400000','000000','004000','008000','00C000','00FF00']},'NDVI_Difference');
+
+Map.setCenter(35.0800,31.7874,12)
