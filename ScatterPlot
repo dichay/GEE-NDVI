@@ -1,0 +1,30 @@
+var image2 = ee.Image("projects/ee-dichay69/assets/VE_VM01"),
+    image1 = ee.Image("COPERNICUS/S2_SR/20200604T081611_20200604T083035_T36RXV"),
+    geometry3 = /* color: #ffc82d */ee.Geometry.Polygon(
+        [[[34.66503644860239, 31.33202959520522],
+          [34.6657686916991, 31.33195169920246],
+          [34.6664928881684, 31.331949408142563],
+          [34.66662163420735, 31.332822297919805],
+          [34.66517055905965, 31.332998707731267]]]);
+//הגיאומטריה של הפוליגון נרשמת תו"כ ציורו,   
+
+var xVar_ndvi1 = image1.normalizedDifference(['B8','B4']);// X - Sentinel
+var yVar_ndvi2 = image2.normalizedDifference(['b11', 'b5']); // Y - VENuS
+
+var NDV_Setup = {min: 0.1, max: 0.9, palette: 'FFFFFF, CE7E45, DF923D, F1B555, FCD163, 99B718, 74A901, 66A000, 529400,' +
+    '3E8601, 207401, 056201, 004C00, 023B01, 012E01, 011D01, 011301'};
+Map.addLayer(image1,{bands:["B4","B3","B2"],min:0,max:5000},'S2Visual');//add Visual layer
+Map.addLayer(image2,{bands:["b5","b4","b3"],min:0,max:1},'VenusVisual');//add Visual layer
+Map.addLayer(xVar_ndvi1,NDV_Setup,'Sentinel NDV');  //add Venus layer 
+Map.addLayer(yVar_ndvi2,NDV_Setup,'VENuS NDV');  //add S2 NDVI layer
+
+// make an image for the two variables 
+var pairedImage =  ee.ImageCollection.fromImages([xVar_ndvi1, yVar_ndvi2])
+                .toBands().rename(["Sentinel","VENuS"]); 
+// Generate a sample of points within the region
+var sample = pairedImage.sampleRegions({collection: geometry3, scale:2}); // לכוונן סקאל 
+
+// Generate chart from sample
+var chart = ui.Chart.feature.byFeature(sample, 'Sentinel', 'VENuS')
+.setChartType('ScatterChart'); 
+print("chart",chart);));
